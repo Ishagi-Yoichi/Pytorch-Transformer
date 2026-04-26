@@ -146,6 +146,12 @@ wheels = [
 ]
 
 [[package]]
+name = "nn"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/2a/b00995cba3fda79210c0002355925b45a3abf882c2b3c42b5275dc6708df/nn-0.1.1.tar.gz", hash = "sha256:1c364054b0859d97ba1b600c95eb2992ef55701e8eeb6a3911db86b868937967", size = 4979, upload-time = "2020-01-27T12:01:45.309Z" }
+
+[[package]]
 name = "nvidia-cublas"
 version = "13.1.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -299,11 +305,15 @@ name = "pytorch-transformer"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "nn" },
     { name = "torch" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "torch", specifier = ">=2.11.0" }]
+requires-dist = [
+    { name = "nn", specifier = ">=0.1.1" },
+    { name = "torch", specifier = ">=2.11.0" },
+]
 
 [[package]]
 name = "setuptools"
