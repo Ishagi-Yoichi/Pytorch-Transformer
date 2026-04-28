@@ -1,6 +1,5 @@
-from turtle import forward
 import torch
-import nn
+import torch.nn as nn
 import math
 
 #converts original sentence into a vector(512 dim)
@@ -159,7 +158,7 @@ class DecoderBlock(nn.Module):
         self.self_attention_block = self_attention_block
         self.cross_attention_block = cross_attention_block
         self.feed_forward_block = feed_forward_block
-        self.residual_connections = nn.Module([ResidualConnection(dropout) for _ in range(3)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(3)])
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
         x = self.residual_connection[0](x, lambda x:self.self_attention_block(x, x, x, tgt_mask))
@@ -245,7 +244,12 @@ def build_tranformer(src_vocab_size: int, tgt_vocab_size:int, src_seq_len:int, t
     projection_layer = ProjectionLayer(d_model, tgt_vocab_size)
     transformer = Transformer(encoder, decoder, src_embed, tgt_embed, src_pos, tgt_pos, projection_layer)
 
+    #initialize params
+    for p in transformer.parameters():
+        if p.dim() > 1:
+            nn.init.xavier_uniform_(p)
     
+    return transformer
 
 
 
