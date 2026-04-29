@@ -40,7 +40,7 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe',pe)# using buffer to save the tensor but not as a learnable parameter 
 
     def forward(self,x):
-        x = x + (self.pe[:, :x.shape[1], :]).requires_grad(False)
+        x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False)
         return self.dropout(x)
 
 class LayerNorm(nn.Module):
@@ -161,20 +161,20 @@ class DecoderBlock(nn.Module):
         self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(3)])
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
-        x = self.residual_connection[0](x, lambda x:self.self_attention_block(x, x, x, tgt_mask))
-        x = self.residual_conection[1](x, lambda x:self.self_cross_attention_block(x, encoder_output, encoder_output, src_mask))
-        x = x.residual_connection[2](x, self.feed_forward_block)
+        x = self.residual_connections[0](x, lambda x:self.self_attention_block(x, x, x, tgt_mask))
+        x = self.residual_connections[1](x, lambda x:self.cross_attention_block(x, encoder_output, encoder_output, src_mask))
+        x = self.residual_connections[2](x, self.feed_forward_block)
         return x
 
-class Decoder(nn.Moudle):
+class Decoder(nn.Module):
 
     def __init__(self,layers:nn.ModuleList):
-        super.__init__ ()
+        super().__init__ ()
         self.layers = layers
         self.norm = LayerNorm()
 
     def forward(self, x, encoder_output, src_mask,tgt_mask):
-        for layer in self.layer:
+        for layer in self.layers:
             x = layer(x, encoder_output, src_mask,tgt_mask)
         return self.norm(x)
 
@@ -185,7 +185,7 @@ class ProjectionLayer(nn.Module):
         super().__init__()
         self.proj = nn.Linear(d_model, vocab_size)
 
-    def froward(self, x):
+    def forward(self, x):
         return torch.log_softmax(self.proj(x), dim=-1)
 
 class Transformer(nn.Module):
@@ -213,7 +213,7 @@ class Transformer(nn.Module):
     def project(self, x):
         return self.projection_layer(x)
 
-def build_tranformer(src_vocab_size: int, tgt_vocab_size:int, src_seq_len:int, tgt_seq_len:int, d_model:int = 512, N: int =6, h:int =8, dropout:float = 0.1, d_ff:int = 2048, ) -> Transformer:
+def build_transformer(src_vocab_size: int, tgt_vocab_size:int, src_seq_len:int, tgt_seq_len:int, d_model:int = 512, N: int =6, h:int =8, dropout:float = 0.1, d_ff:int = 2048, ) -> Transformer:
     #create embedding layers
     src_embed = InputEmbeddings(d_model, src_vocab_size)
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
